@@ -23,7 +23,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        sync: false
+        value: https://cafe-frontend-m4d9.onrender.com
 
   # Frontend (Static Site)
   - type: web
@@ -32,9 +32,22 @@ services:
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /order
+        destination: /index.html
+      - type: rewrite
+        source: /order/*
+        destination: /index.html
+      - type: rewrite
+        source: /manager
+        destination: /index.html
+      - type: rewrite
+        source: /manager/*
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://cafe-backend-hzy6.onrender.com
 
 databases:
   - name: cafe-db

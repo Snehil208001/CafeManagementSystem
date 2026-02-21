@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { apiGet, apiPost } from "../../api/client";
 import type { Dish, Offer, Banner, OrderItem } from "../../types";
 import BannerImage from "../../components/BannerImage";
@@ -125,9 +125,14 @@ export default function OrderPage() {
 
   return (
     <div className="min-h-screen bg-amber-50 pb-24">
-      <header className="bg-amber-800 text-white p-4 sticky top-0 z-10">
-        <h1 className="text-xl font-bold">Cafe Menu</h1>
-        <p className="text-amber-200 text-sm">Table {tableNumber}</p>
+      <header className="bg-amber-800 text-white p-4 sticky top-0 z-10 flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-bold">Cafe Menu</h1>
+          <p className="text-amber-200 text-sm">Table {tableNumber}</p>
+        </div>
+        <Link to="/manager/login" className="text-amber-200 hover:text-white text-sm underline">
+          Manager
+        </Link>
       </header>
 
       {banners.length > 0 && (
