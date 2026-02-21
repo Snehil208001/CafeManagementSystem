@@ -2,6 +2,13 @@
 
 A full-stack web app for cafe table ordering. Customers scan QR codes on tables to view the menu and place orders. Managers can confirm/complete orders, manage the menu, banners, and offers.
 
+## Live Demo
+
+- **Backend**: https://cafe-backend-hzy6.onrender.com
+- **Frontend**: https://cafe-frontend-m4d9.onrender.com
+- **Customer**: https://cafe-frontend-m4d9.onrender.com/order?table=1
+- **Manager**: https://cafe-frontend-m4d9.onrender.com/manager/login (manager@cafe.com / manager123)
+
 ## Tech Stack
 
 - **Backend**: Node.js, Express, TypeScript, Prisma, PostgreSQL, Socket.io
