@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CafeTable {
+  id         String   @id @default(cuid())
+  tableNumber Int      @unique
+  qrCodeUrl  String?
+  status     String   @default("available") // available, occupied
+  orders     Order[]
+  createdAt  DateTime @default(now())
+}
+
+model Dish {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  imageUrl    String?
+  category    String   // e.g. Beverages, Food, Desserts
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  tableId   String
+  table     CafeTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  items     Json     // [{ dishId, name, price, quantity }]
+  status    String   @default("pending") // pending, confirmed, preparing, completed
+  createdAt DateTime @default(now())
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  link      String?
+  position  Int      @default(0)
+  isActive  Boolean  @default(true)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Offer {
+  id               String   @id @default(cuid())
+  title            String
+  description      String?
+  discountType     String   // percentage, fixed
+  discountValue    Float
+  applicableDishIds Json     @default("[]") // JSON array of dish IDs (empty = all)
+  isActive         Boolean  @default(true)
+  startDate        DateTime?
+  endDate         DateTime?
+  createdAt        DateTime @default(now())
+}
+
+model Manager {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+}

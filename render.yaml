@@ -1,0 +1,44 @@
+# Render Blueprint - Free hosting for Cafe Management System
+# Deploy: Push to GitHub, connect repo at https://dashboard.render.com
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API
+  - type: web
+    name: cafe-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm run start
+    healthCheckPath: /api/menu
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cafe-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+
+  # Frontend (Static Site)
+  - type: web
+    name: cafe-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+
+databases:
+  - name: cafe-db
+    databaseName: cafe
+    user: cafe
+    plan: free
+    region: oregon
