@@ -36,6 +36,19 @@ model Order {
   table     CafeTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
   items     Json     // [{ dishId, name, price, quantity }]
   status    String   @default("pending") // pending, confirmed, preparing, completed
+  payments  Payment[]
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Float
+  method    String   // cash, card, upi
+  status    String   @default("completed") // pending, completed, failed
+  paidAt    DateTime @default(now())
+  billSent  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 

@@ -80,9 +80,9 @@ router.get("/all", authMiddleware, async (req, res) => {
 router.get("/manager", authMiddleware, async (req, res) => {
   try {
     const orders = await prisma.order.findMany({
-      include: { table: true },
+      include: { table: true, payments: true },
       orderBy: { createdAt: "desc" },
-      take: 100,
+      take: 200,
     });
     res.json(orders);
   } catch (err) {

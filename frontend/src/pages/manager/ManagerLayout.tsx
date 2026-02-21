@@ -25,6 +25,12 @@ export default function ManagerLayout() {
           <Link to="/manager" className="font-medium hover:underline">
             Orders
           </Link>
+          <Link to="/manager/order-history" className="font-medium hover:underline">
+            Order History
+          </Link>
+          <Link to="/manager/payments" className="font-medium hover:underline">
+            Payment History
+          </Link>
           <Link to="/manager/menu" className="font-medium hover:underline">
             Menu
           </Link>

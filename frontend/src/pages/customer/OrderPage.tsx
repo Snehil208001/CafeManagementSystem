@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { apiGet, apiPost } from "../../api/client";
 import type { Dish, Offer, Banner, OrderItem } from "../../types";
 import BannerImage from "../../components/BannerImage";
@@ -7,6 +7,7 @@ import { useOrderUpdates } from "../../hooks/useSocket";
 
 export default function OrderPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tableNumber = parseInt(searchParams.get("table") || "0", 10);
 
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -15,7 +16,9 @@ export default function OrderPage() {
   const [cart, setCart] = useState<{ dish: Dish; qty: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState<{ id: string; status: string } | null>(null);
+  const [orderPlaced, setOrderPlaced] = useState<{ id: string; status: string; total?: number } | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [paid, setPaid] = useState(false);
   const [error, setError] = useState("");
 
   const fetchMenu = useCallback(async () => {
@@ -44,6 +47,25 @@ export default function OrderPage() {
       setOrderPlaced((prev) => (prev ? { ...prev, status: o.status } : null));
     }
   });
+
+  const payNow = async () => {
+    if (!orderPlaced?.id || !orderPlaced?.total) return;
+    setPaying(true);
+    setError("");
+    try {
+      await apiPost("/payments", {
+        orderId: orderPlaced.id,
+        amount: orderPlaced.total,
+        method: "cash",
+      });
+      setPaid(true);
+      navigate(`/receipt/${orderPlaced.id}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Payment failed");
+    } finally {
+      setPaying(false);
+    }
+  };
 
   const addToCart = (dish: Dish) => {
     setCart((prev) => {
@@ -86,7 +108,7 @@ export default function OrderPage() {
         tableNumber,
         items,
       });
-      setOrderPlaced(order);
+      setOrderPlaced({ ...order, total: subtotal });
       setCart([]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to place order");
@@ -227,9 +249,21 @@ export default function OrderPage() {
           <p className="text-red-600 text-sm mb-2">{error}</p>
         )}
         {orderPlaced && (
-          <p className="text-green-700 font-medium mb-2">
-            {statusLabels[orderPlaced.status] || orderPlaced.status}
-          </p>
+          <div className="mb-2">
+            <p className="text-green-700 font-medium">
+              {statusLabels[orderPlaced.status] || orderPlaced.status}
+            </p>
+            {orderPlaced.status === "completed" && !paid && (
+              <button
+                onClick={payNow}
+                disabled={paying}
+                className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700 disabled:opacity-50"
+              >
+                {paying ? "Processing..." : "Pay ₹" + (orderPlaced.total || 0).toFixed(0) + " - Get Bill"}
+              </button>
+            )}
+            {paid && <p className="text-green-600 text-sm mt-1">Redirecting to bill...</p>}
+          </div>
         )}
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 overflow-x-auto">

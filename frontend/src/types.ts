@@ -40,6 +40,7 @@ export interface Order {
   items: OrderItem[];
   status: "pending" | "confirmed" | "preparing" | "completed";
   createdAt: string;
+  payments?: { amount: number; paidAt: string; method: string }[];
 }
 
 export interface CafeTable {
