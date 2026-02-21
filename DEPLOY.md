@@ -1,22 +1,16 @@
 # Deploy Cafe Management System (Free)
 
-Host both frontend and backend for free using **Render** (backend + database + frontend) or **Vercel + Render** (recommended for simpler setup).
+Host both frontend and backend for free using **Render** (backend + database + frontend) or **Vercel + Render**.
+
+**Quick start**: See **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)** for step-by-step with your repo.
 
 ---
 
-## Option A: All-in-One on Render (Simplest)
+## Option A: All-in-One on Render (Recommended)
 
-### 1. Push to GitHub
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/HotelManagementSystem.git
-git push -u origin main
-```
+**Repo**: https://github.com/Snehil208001/CafeManagementSystem
 
-### 2. Deploy on Render
+### 1. Deploy on Render
 1. Go to [render.com](https://render.com) and sign up (free)
 2. Click **New** → **Blueprint**
 3. Connect your GitHub repo
