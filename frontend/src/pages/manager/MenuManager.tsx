@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { apiGet, apiPost, apiPut, apiDelete } from "../../api/client";
 import type { Dish } from "../../types";
+import { useLocation } from "../../contexts/LocationContext";
 
 export default function MenuManager() {
+  const { selectedId: locationId } = useLocation();
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Dish | null>(null);
@@ -15,8 +17,9 @@ export default function MenuManager() {
   });
 
   const fetchDishes = async () => {
+    if (!locationId) return;
     try {
-      const data = await apiGet<Dish[]>("/menu/all");
+      const data = await apiGet<Dish[]>(`/menu/all?locationId=${locationId}`);
       setDishes(data);
     } catch (e) {
       console.error(e);
@@ -27,7 +30,7 @@ export default function MenuManager() {
 
   useEffect(() => {
     fetchDishes();
-  }, []);
+  }, [locationId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +50,7 @@ export default function MenuManager() {
           price: parseFloat(form.price),
           category: form.category,
           imageUrl: form.imageUrl || null,
+          locationId,
         });
       }
       setForm({ name: "", description: "", price: "", category: "Beverages", imageUrl: "" });

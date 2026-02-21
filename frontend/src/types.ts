@@ -46,6 +46,7 @@ export interface Order {
 export interface CafeTable {
   id: string;
   tableNumber: number;
+  qrCodeUrl?: string | null;
   status: string;
   orders?: Order[];
 }

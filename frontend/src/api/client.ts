@@ -37,3 +37,25 @@ export const apiPatch = <T>(path: string, body: unknown) =>
   api<T>(path, { method: "PATCH", body: JSON.stringify(body) });
 export const apiDelete = <T>(path: string) =>
   api<T>(path, { method: "DELETE" });
+
+/** Kitchen API - no manager auth, optional X-Kitchen-Token for secured setups */
+export async function kitchenApi<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token = localStorage.getItem("kitchenToken");
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) {
+    (headers as Record<string, string>)["X-Kitchen-Token"] = token;
+  }
+  const API_BASE = import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api`
+    : "/api";
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed: ${res.status}`);
+  return data as T;
+}

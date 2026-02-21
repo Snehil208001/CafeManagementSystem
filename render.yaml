@@ -51,6 +51,9 @@ services:
       - type: rewrite
         source: /receipt/*
         destination: /index.html
+      - type: rewrite
+        source: /kitchen
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
         value: https://cafe-backend-hzy6.onrender.com

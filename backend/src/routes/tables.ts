@@ -4,14 +4,14 @@ import { authMiddleware } from "../middleware/auth";
 
 const router = Router();
 
-// Manager: get all tables
+// Manager: get all tables, optional ?locationId=
 router.get("/", authMiddleware, async (req, res) => {
   try {
+    const locationId = req.query.locationId as string | undefined;
     const tables = await prisma.cafeTable.findMany({
+      where: locationId ? { locationId } : undefined,
       include: {
-        orders: {
-          where: { status: { not: "completed" } },
-        },
+        orders: { where: { status: { not: "completed" } } },
       },
       orderBy: { tableNumber: "asc" },
     });
@@ -25,10 +25,18 @@ router.get("/", authMiddleware, async (req, res) => {
 // Manager: create tables (bulk)
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    const { count } = req.body;
+    const { count, locationId } = req.body;
     const num = count || 10;
+    let locId = locationId;
+    if (!locId) {
+      const first = await prisma.location.findFirst({ orderBy: { name: "asc" } });
+      locId = first?.id;
+    }
+    if (!locId) {
+      return res.status(400).json({ error: "No location available" });
+    }
 
-    const existing = await prisma.cafeTable.findMany();
+    const existing = await prisma.cafeTable.findMany({ where: { locationId: locId } });
     const maxNum = existing.length
       ? Math.max(...existing.map((t) => t.tableNumber))
       : 0;
@@ -38,8 +46,9 @@ router.post("/", authMiddleware, async (req, res) => {
       const tableNumber = maxNum + i;
       const table = await prisma.cafeTable.create({
         data: {
+          locationId: locId,
           tableNumber,
-          qrCodeUrl: `/order?table=${tableNumber}`,
+          qrCodeUrl: `/order?table=${tableNumber}&location=${locId}`,
         },
       });
       tables.push(table);

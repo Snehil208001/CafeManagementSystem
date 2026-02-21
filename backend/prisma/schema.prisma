@@ -10,17 +10,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Location {
+  id        String      @id @default(cuid())
+  name      String
+  address   String?
+  tables    CafeTable[]
+  dishes    Dish[]
+  banners   Banner[]
+  offers    Offer[]
+  createdAt DateTime    @default(now())
+}
+
 model CafeTable {
   id         String   @id @default(cuid())
-  tableNumber Int      @unique
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  tableNumber Int
   qrCodeUrl  String?
   status     String   @default("available") // available, occupied
   orders     Order[]
   createdAt  DateTime @default(now())
+
+  @@unique([locationId, tableNumber])
 }
 
 model Dish {
   id          String   @id @default(cuid())
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
   name        String
   description String?
   price       Float
@@ -53,18 +70,22 @@ model Payment {
 }
 
 model Banner {
-  id        String   @id @default(cuid())
-  imageUrl  String
-  link      String?
-  position  Int      @default(0)
-  isActive  Boolean  @default(true)
-  startDate DateTime?
-  endDate   DateTime?
-  createdAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  imageUrl   String
+  link       String?
+  position   Int       @default(0)
+  isActive   Boolean   @default(true)
+  startDate  DateTime?
+  endDate    DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model Offer {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
+  locationId       String?
+  location         Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
   title            String
   description      String?
   discountType     String   // percentage, fixed
@@ -72,7 +93,7 @@ model Offer {
   applicableDishIds Json     @default("[]") // JSON array of dish IDs (empty = all)
   isActive         Boolean  @default(true)
   startDate        DateTime?
-  endDate         DateTime?
+  endDate          DateTime?
   createdAt        DateTime @default(now())
 }
 

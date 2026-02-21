@@ -9,6 +9,8 @@ import bannersRoutes from "./routes/banners";
 import offersRoutes from "./routes/offers";
 import tablesRoutes from "./routes/tables";
 import paymentsRoutes from "./routes/payments";
+import analyticsRoutes from "./routes/analytics";
+import locationsRoutes from "./routes/locations";
 import { initSocket } from "./socket";
 
 const app = express();
@@ -40,6 +42,8 @@ app.use("/api/banners", bannersRoutes);
 app.use("/api/offers", offersRoutes);
 app.use("/api/tables", tablesRoutes);
 app.use("/api/payments", paymentsRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/locations", locationsRoutes);
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {

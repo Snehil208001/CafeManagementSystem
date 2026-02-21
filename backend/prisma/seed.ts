@@ -6,6 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await bcrypt.hash("manager123", 10);
 
+  const defaultLocation = await prisma.location.upsert({
+    where: { id: "loc_default" },
+    update: {},
+    create: { id: "loc_default", name: "Main Branch", address: null },
+  });
+
   const manager = await prisma.manager.upsert({
     where: { email: "manager@cafe.com" },
     update: {},
@@ -21,11 +27,12 @@ async function main() {
   // Create sample tables
   for (let i = 1; i <= 5; i++) {
     await prisma.cafeTable.upsert({
-      where: { tableNumber: i },
+      where: { locationId_tableNumber: { locationId: defaultLocation.id, tableNumber: i } },
       update: {},
       create: {
+        locationId: defaultLocation.id,
         tableNumber: i,
-        qrCodeUrl: `/order?table=${i}`,
+        qrCodeUrl: `/order?table=${i}&location=${defaultLocation.id}`,
       },
     });
   }
@@ -46,11 +53,12 @@ async function main() {
 
   for (const dish of dishes) {
     const existing = await prisma.dish.findFirst({
-      where: { name: dish.name },
+      where: { name: dish.name, locationId: defaultLocation.id },
     });
     if (!existing) {
       await prisma.dish.create({
         data: {
+          locationId: defaultLocation.id,
           name: dish.name,
           description: dish.description,
           price: dish.price,

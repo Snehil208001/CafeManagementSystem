@@ -2,14 +2,17 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { apiGet, apiPost } from "../../api/client";
 import type { CafeTable } from "../../types";
+import { useLocation } from "../../contexts/LocationContext";
 
 export default function QRPage() {
+  const { selectedId: locationId } = useLocation();
   const [tables, setTables] = useState<CafeTable[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchTables = () => {
+    if (!locationId) return;
     setLoading(true);
-    apiGet<CafeTable[]>("/tables")
+    apiGet<CafeTable[]>(`/tables?locationId=${locationId}`)
       .then(setTables)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -17,11 +20,11 @@ export default function QRPage() {
 
   useEffect(() => {
     fetchTables();
-  }, []);
+  }, [locationId]);
 
   const createTables = async () => {
     try {
-      await apiPost("/tables", { count: 5 });
+      await apiPost("/tables", { count: 5, locationId });
       fetchTables();
     } catch (e) {
       console.error(e);
@@ -53,7 +56,9 @@ export default function QRPage() {
       )}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {tables.map((table) => {
-          const url = `${baseUrl}/order?table=${table.tableNumber}`;
+          const url = table.qrCodeUrl
+            ? `${baseUrl}${table.qrCodeUrl}`
+            : `${baseUrl}/order?table=${table.tableNumber}${locationId ? `&location=${locationId}` : ""}`;
           return (
             <div
               key={table.id}
